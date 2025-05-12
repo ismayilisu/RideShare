@@ -7,3 +7,5 @@ const Protected=({children})=>{
     return token ? children:<Navigate to="/LoginPage"/>
 }
 export default Protected
+
+//same procedure for the user and driver login check or not

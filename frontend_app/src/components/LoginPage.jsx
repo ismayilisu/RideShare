@@ -3,6 +3,7 @@ import React, { useState } from 'react'
 import axios from 'axios'
 import { useNavigate } from 'react-router-dom'
 
+
 const LoginPage=()=>{
   
 //logic used here is data is taken and send it to backend where i have stored user data in a json file.
@@ -10,44 +11,43 @@ const LoginPage=()=>{
 
 
 const navigate=useNavigate()
+const [page,setpage]=useState("login")
 
 const submit= async(event)=> {
    event.preventDefault();
-  const values={username:document.getElementById('f').value,
-   
+  const values={
+    username:document.getElementById('f').value,
     e:document.getElementById('e').value,
-    p:document.getElementById('p').value
+    pp:document.getElementById('p').value
   }
-  console.log(values);
-  console.log(localStorage.getItem('token'))
 
-await axios.post('http://www.localhost:5000/register',values).then(res=>{console.log(res.data.token_v)
+
+await axios.post('http://www.localhost:5000/register',values).then(
+  res=>{
   localStorage.setItem("token",res.data.token_v);
-  navigate('/Dashboard')}).catch(err=>{alert(err)});
+  localStorage.setItem("id",res.data.id)
+  navigate('/home')}).catch(err=>{alert(err)});
 
 
   
 // }
 }
-const [curr,setcurr]=useState(true)
-const login_register=()=>{
- if (curr==true){
-  setcurr(false)
- }
- if (curr==false){
-  setcurr(true)
- }
-}
+
+
 const login= async(event)=>{
   event.preventDefault();
-  const cred={u:document.getElementById('u').value,
+  const cred={
+    username:document.getElementById('u').value,
     pp:document.getElementById('pp').value
   }
   await axios.post("http://www.localhost:5000/checkdata",cred)
   .then((res)=>{if (res.data.status==="true")
     {
+      console.log(res.data)
      localStorage.setItem('token',res.data.token)
-     navigate('/Dashboard')
+     localStorage.setItem('id',res.data.id)
+     console.log(localStorage.getItem('id'))
+     navigate('/home')
     } 
     else{
      alert("Invalid Credentials")
@@ -60,66 +60,60 @@ const login= async(event)=>{
 
 return (
   
-<div  className='h-screen w-full bg-gray-500 overflow-auto flex justify-center items-center'>
-<div className='w-300 h-200 bg-gray-800  rounded-4xl p-3 flex justify-evenly '>
-  <div className='border-1 h-full w-150 rounded-4xl'>
-
-
+<div  className='h-screen w-screen bg-black overflow-hidden flex justify-center items-center'>
+<div className='h-fit border-white w-fit border-2 rounded-2xl flex flex-col p-5'>
+  <div className='w-full h-10 p-5 flex flex-row justify-around items-center [&>*]:text-white [&>*]:font-mono  [&>*]:text-2xl  [&>*]:hover:cursor-pointer'>
+    <button className='p-2' onClick={()=>{setpage("login")}}> LOGIN</button>
+    <button onClick={()=>{setpage("register")}}> NEW USER</button>
   </div>
-  {curr === true ? (
-    <div className='h-full  rounded-4xl '>
-
-    <div className='text-[white] p-5 m-10   h-full flex flex-col justify-evenly'>
-     <div className=''> <h1 className='text-left text-5xl mt-3 '>Create an Account</h1>
-     <span className=' text-left mt-5 '> Already Have an Account <a  className='underline cursor-pointer' onClick={login_register}>Log in</a></span></div>
-      <form    className='flex flex-col justify-between gap-3' onSubmit={submit}>
-        <div className=' flex justify-between gap-3'>
-        <input id='f' className=' focus:border-black focus:p-1' type='text' placeholder='Username'></input>
-        </div>
-        <input id='e' type='email' placeholder='Email' className='block mt-3 w-full  focus:p-1'></input>
-        <input id='p' type='password' placeholder='Enter your Password' className='mt-3 block w-full  focus:p-1'></input>
-        <div>
-        <div><input id='d' type='checkbox' />
-        <span className='mt-4 ml-3 '>Register as Cab driver</span></div>
-        <input type='radio' id='tc' />
-        <span className='mt-4 ml-3'>I agree to the <a>Terms & Conditions</a></span>
-        </div>
-        <button  className='block bg-black w-full h-10 rounded-4xl mt-10'onClick={submit}>Create Account</button>
-      </form>
-      <span className='text-center'>---Or Register With---</span>
-      <div className='flex justify-evenly'>
-        <button> Google</button>
-        <button> Apple</button>
-      </div>
-    </div>
-
-  </div>
-  ):( <div className='h-full  rounded-4xl '>
-
-<div className='text-[white] p-5 m-10   h-full flex flex-col justify-evenly'>
- <div className=''> <h1 className='text-left text-5xl mt-3 '> Login To Account</h1>
- <span className=' text-left mt-5 '> New Here ? <a  className='underline cursor-pointer' onClick={login_register}>Register</a></span></div>
-  <form    className='flex flex-col justify-between gap-3' onSubmit={login}>
-    <div className=' flex justify-between gap-3'>
-    <input id='u' className=' focus:border-black focus:p-1' type='text' placeholder='Username'></input>
+  <div className='h-full w-full bg-gray-400 p-2 rounded-2xl'>
+  {page==="login"? (
+    <div className='flex flex-row justify-center items-center p-10 '>
+    <form    className='flex flex-col justify-between gap-3 ' onSubmit={login}>
+    <div className=' flex justify-between gap-3 items-center'>
+    <h2>Username : </h2>
+    <input id='u' className=' focus:border-black p-1 rounded-xl ' type='text' placeholder='Enter your Username'></input>
     
     </div>
+ <div className=' flex justify-between gap-3 items-center'>
+ <h2>Password : </h2>
+ <input id='pp' type='password' placeholder='Enter your Password' className='mt-3   p-1 rounded-xl'></input>
+ </div>
+ <span> <a href='www.google.com' className='underline'> Forgot Password</a></span>
+    <button  className='block bg-black w-full h-10 rounded-4xl mt-10 text-white font-mono' onClick={login}>Login</button>
    
-    <input id='pp' type='password' placeholder='Enter your Password' className='mt-3 block w-full  focus:p-1'></input>
-    <div>
-   
-    
-    
-    </div>
-    <button  className='block bg-black w-full h-10 rounded-4xl mt-10' onClick={login}>Login</button>
   </form>
-  <span> <a> Forgot Password</a></span>
   
+    </div>
+  ):(
+    <div className='p-10 flex flex-row items-center justify-center'>
+    <form    className='flex flex-col justify-between gap-3' onSubmit={submit}>
+        <div className=' flex justify-between gap-3 items-center'>
+        <h2>Username :</h2>
+        <input id='f' className=' rounded-xl p-1 ' type='text' placeholder='Enter Username'></input>
+        </div>
+        <div className=' flex justify-between gap-3 items-center'>
+        <h2>Email : </h2>
+        <input id='e' type='email' placeholder='Enter Email' className=' rounded-xl  p-1'></input>
+
+        </div>
+        <div className=' flex justify-between gap-3 items-center'>
+          <h2>Password</h2>
+          <input id='p' type='password' placeholder='Enter your Password' className='  '></input>
+
+        </div>
+        <div>
+        
+        <input type='checkbox' id='tc' className='' />
+        <span className='mt-4 ml-3'>I agree to the <a className='underline'>Terms & Conditions</a></span>
+        </div>
+        <button  className=' bg-black w-full rounded-4xl mt-10 text-white font-mono h-10'onClick={submit}>Create Account</button>
+      </form>
+  </div>)}
+
+  </div>
 </div>
 
-</div>)}
-
-</div>
  
  </div>
 );
