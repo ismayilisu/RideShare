@@ -27,60 +27,37 @@ const [rideid,setrideid]=useState('')
         };
       }, []);
 
-    //   useEffect(() => {
-    //     console.log(socket.current)
-    //     if (!socket.current) return;
-    
-        
-    //     socket.current.emit('join_room', rowid);
-    //     console.log("connected new room")
-    // setprevmess([])
-    //     const handleReceiveMessage = (data) => {
-    //         console.log("mesage recieved")
-          
-    //             setprevmess(prev => [...prev, data]);
-            
-    //     };
-    
-    //     socket.current.on('receive_message', handleReceiveMessage);
-    
-    
-    //     return () => {
-    //         socket.current.emit('leave_room', rowid); 
-    //         console.log('disconnected rrom')
-    //         socket.current.off('receive_message', handleReceiveMessage);
-    //     };
-    // }, [rowid]);
+ 
     useEffect(() => {
+        if(!rowid) return;
         console.log("recievign message")
-        console.log("Socket current:", socket.current);  // Logs socket when effect runs
+        console.log("Socket current:", socket.current);  
     
-        if (!socket.current) return;  // If socket is not initialized, exit early
-    
-        // Join the room when socket is ready and rowid changes
+        if (!socket.current) return;  
+        console.log(rowid)
         socket.current.emit('join_room', rowid);
         console.log("Connected to room:", rowid);
-    
-        // Clear previous messages when entering a new room
+
         setprevmess([]);
     
-        // Define handler for receiving messages
+        
         const handleReceiveMessage = (data) => {
+            console.log(data)
             console.log("Message received:", data);
             setprevmess(prev => [...prev, data]);  
         };
     
-        // Start listening for the 'receive_message' event
+        console.log('Listening message ')
         socket.current.on('recieve_message', handleReceiveMessage);
     
-        // Cleanup function to leave room and remove event listener
+    
         return () => {
             console.log("Disconnected from room:", rowid);
             socket.current.emit('leave_room', rowid);  // Leave the room on cleanup
-            socket.current.off('receive_message', handleReceiveMessage);  // Remove event listener
+            socket.current.off('recieve_message', handleReceiveMessage);  // Remove event listener
         };
     
-    }, [rowid, socket.current]);  // Trigger effect when `rowid` or `socket.current` changes
+    }, [rowid]);  // Trigger effect when `rowid` or `socket.current` changes
     
     
     
@@ -135,10 +112,13 @@ const deadbook=bdet.filter(value=>value.isexpired==1)
 console.log("Page rendered")
     const navigate=useNavigate()
     const logout=()=>{
+        setpage('logout')
         localStorage.removeItem('token')
         navigate('/home')
        }
+       
        const delet=async()=>  {
+       
         
         const token=localStorage.getItem('token')
        
@@ -269,10 +249,10 @@ className=' w-full text-center bg-gray-300 p-5 ' onClick={()=>{
 
 
 </div>
-<div className='bg-white  relative h-full w-full p-2 flex justify-center rounded-xl '>
+<div className='  relative h-full w-full p-2 flex justify-center rounded-xl '>
 {chat ? (<div className='fixed inset-0 z-10 '>
     <div className='w-full h-full absolute z-20 backdrop-blur-sm flex justify-center items-center p-20'>
-        <div className=' w-full h-full bg-white flex flex-col rounded-2xl shadow-2xl gap-1'>
+        <div className=' w-full h-full  flex flex-col rounded-2xl shadow-2xl gap-1'>
             <div className='h-10 p-2 w-full flex justify-end'>
                 <div className=' w-10 h-10 rounded-full bg-black'><button onClick={()=>{showchat(false)
                 socket.current.emit('leave_room',rowid)
@@ -281,7 +261,7 @@ className=' w-full text-center bg-gray-300 p-5 ' onClick={()=>{
                 }} className='w-full h-full text-white font-bold text-2xl hover:cursor-pointer'>X</button></div>
             </div>
             <div  className='p-2 flex flex-col  font-mono w-full h-full gap-2'>
-                <div className='border rounded-lg p-2'>LISTED BY : and USERS</div>
+                <div className='border rounded-lg p-2'>{`Listed By User : ${rideid}`}</div>
                 <div className=' rounded-lg flex-1 p-1 bg-gray-200'>
                 {getmess?
                 (
@@ -296,7 +276,11 @@ className=' w-full text-center bg-gray-300 p-5 ' onClick={()=>{
                 </div>)
                 :
                 (<div className='flex items-center justify-center font-mono'> <h1>No Messages found.</h1></div>)}</div>):(<Loading/>)}</div>
-                <div className=' h-10 flex flex-row gap-2'><input className='w-full h-full bg-gray-300 rounded-sm p-1' placeholder='Type Your Message here' onKeyDown={(e)=>{if((e.key)=='Enter') {sendmess()}}} onChange={(e)=>{setmess(e.target.value)
+                <div className=' h-10 flex flex-row gap-2'><input className='w-full h-full bg-gray-300 rounded-sm p-1' placeholder='Type Your Message here' onKeyDown={(e)=>{
+                    if((e.key)=='Enter') {sendmess();e.target.value=''}
+
+                
+                }} onChange={(e)=>{setmess(e.target.value)
                 
 
 
@@ -485,34 +469,34 @@ onClick={async() => {
 
 )}
 
-    {page=="profile"  && (
-        <div className=' h-fit w-full bg-white  rounded-3xl shadow-2xl flex flex-col gap-4 p-3'>
+    {page=="profile" && (
+        <div className=' h-fit w-full  rounded-3xl shadow-2xl flex flex-col gap-4 p-3'>
     <div className='flex justify-center items-center h-50'>
         <img className='rounded-full h-30 w-30' src={profile}></img>
     </div>
     <div className='[&>*]: flex gap-2 flex-col [&>*]:h-10 [&>*]:p-2.5'>
         <div className='flex flex-row gap-2 items-center'>
             <h3>Name : </h3>
-            <input id='fname' className='bg-gray-200 rounded-2xl p-2' defaultValue={data.username} onChange={ (e)=>{
+            <input id='fname' className=' rounded-2xl p-2 bg-gray-300' defaultValue={data.username} onChange={ (e)=>{
         setchange(true)}}> 
         </input>
         </div>
         <div className='flex flex-row gap-2 items-center'>
             <h3>E-Mail : </h3>
-            <input id='lname' className='bg-gray-200 rounded-2xl p-2' defaultValue={data.email}  onChange={ ()=>{setchange(true)}}></input>
+            <input id='lname' className=' rounded-2xl p-2 bg-gray-300' defaultValue={data.email}  onChange={ ()=>{setchange(true)}}></input>
 
             
         </div>
         <div className='flex flex-row gap-2 items-center'>
             <h3>NITC-MAIL  : </h3>
-            <input disabled defaultValue={data.phone || 'Unavailable'} className='bg-gray-200 rounded-2xl hover:cursor-not-allowed p-2'></input>
+            <input disabled defaultValue={data.phone || 'Unavailable'} className='bg-gray-300 rounded-2xl hover:cursor-not-allowed p-2'></input>
 
 
             
         </div>
         <div className='flex flex-row gap-2 items-center'>
             <h3>CONTACT-NO : </h3>
-            <input disabled defaultValue={data.phone} className='bg-gray-200 rounded-2xl hover:cursor-not-allowed p-2'></input>
+            <input disabled defaultValue={data.phone || 'Unavailable'} className='bg-gray-200 rounded-2xl hover:cursor-not-allowed p-2 bg-gray-300'></input>
 
 
             
@@ -521,8 +505,8 @@ onClick={async() => {
         
     </div>
     <div className='flex justify-around [&>*]:h-15 [&>*]:rounded-2xl [&>*]:p-3 '>
-        <button className='bg-black text-white hover:cursor-pointer' onClick={delet}>DELETE ACCOUNT</button>
-        <button  className='bg-gray-200 text-black hover:cursor-pointer' onClick={logout}>LOGOUT</button>
+        <button className='bg-black text-white hover:cursor-pointer' onClick={()=>{ setpage('delete')}}>DELETE ACCOUNT</button>
+        <button  className='bg-gray-200 text-black hover:cursor-pointer' onClick={()=>{ setpage('logout')}}>LOGOUT</button>
     </div>
     {changes==true?(<button>SAVE CHANGES</button>):(<div></div>)}
 
@@ -588,6 +572,80 @@ onClick={async() => {
                 
             </div>
         </div>)}
+
+
+        {page=='delete' && <div className='fixed inset-0  z-10'>
+        <div className='inset-0 absolute backdrop-blur-sm flex justify-center items-center z-20 backdrop-brightness-50 '>
+         <div className=' w-150 h-100 flex flex-col gap-5 p-10 text-black bg-white rounded-sm '>
+            <h2 className='w-full text-2xl font-bold'>
+            Are you absolutely sure you want to delete your account?  
+This action is permanent and all your data will be lost.
+</h2>
+            <p className='flex-1'>* You will no longer be able to recover your profile, messages, bookings, or any associated content.
+</p>
+            <div className='flex flex-row w-full h-fit justify-around '><motion.button className='hover:cursor-pointer p-2 rounded-lg'
+              whileHover={{
+    backgroundColor: "#000000",
+    color: "#ffffff" 
+  }}
+  transition={{
+    duration: 0.3,
+    ease: "easeInOut"
+  }}
+            
+            onClick={()=>{setpage('profile')}}>Cancel</motion.button> <motion.button 
+            className='hover:cursor-pointer p-2 rounded-lg'
+              whileHover={{
+    backgroundColor: "#000000",
+    color: "#ffffff" 
+  }}
+  transition={{
+    duration: 0.3,
+    ease: "easeInOut"
+  }}
+  onClick={()=>{delet()}}
+            >Confirm</motion.button></div>
+         </div>
+
+
+
+        </div></div>}
+
+        {page=='logout' && <div className='fixed inset-0  z-10'>
+        <div className='inset-0 absolute backdrop-blur-sm flex justify-center items-center z-20 backdrop-brightness-50 '>
+         <div className=' w-150 h-100 flex flex-col gap-5 p-10 text-black bg-white rounded-sm '>
+            <h2 className='w-full text-2xl font-bold'>
+           Are you sure you want to log out?  
+</h2>
+            <p className='flex-1'>* You will need to log in again to access your account.
+</p>
+            <div className='flex flex-row w-full h-fit justify-around '><motion.button className='hover:cursor-pointer p-2 rounded-lg'
+              whileHover={{
+    backgroundColor: "#000000",
+    color: "#ffffff" 
+  }}
+  transition={{
+    duration: 0.3,
+    ease: "easeInOut"
+  }}
+            
+            onClick={()=>{setpage('profile')}}>Cancel</motion.button> <motion.button 
+            className='hover:cursor-pointer p-2 rounded-lg'
+              whileHover={{
+    backgroundColor: "#000000",
+    color: "#ffffff" 
+  }}
+  transition={{
+    duration: 0.3,
+    ease: "easeInOut"
+  }}
+  onClick={()=>{logout()}}
+            >Confirm</motion.button></div>
+         </div>
+
+
+
+        </div></div>}
             </div>
     
     

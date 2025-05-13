@@ -6,9 +6,11 @@ const cors=require('cors');
 const encrypt =require('bcryptjs')
 const http = require('http')
 const {Server} = require('socket.io')
-
 const server=http.createServer(app);//wounding with socket giving access to both socket and raw http
 //attaching socket to raw http
+const path = require('path');
+const tt=require('dotenv').config().parsed;
+
 const io= new Server(server,{
   cors:{origin:'http://localhost:5173',
     methods:['GET','POST'],
@@ -18,26 +20,30 @@ const io= new Server(server,{
 //logic
 
 
-io.on('connection',(socket)=>{
-  console.log('New websocket Connection',socket.id)
+io.on('connection',async (socket)=>{
+  // console.log('New websocket Connection',socket.id)
  try {
-
-  socket.on('send_message',(data)=>{
+await socket.on('join_room', (room) => {
+  // console.log('joiunign ',room)
+    socket.join(room);
+});
+   socket.on('send_message',async(data)=>{
     const details=data
-    console.log(`${data} gettign messge`)
-    
+   
     
      db.query(`insert into chat(row_id,msg,date,time,user_id) value(?,?,?,?,?)`,[details.row_id,details.msg,details.date,details.time,details.user_id]).then(()=>{console.log("successfully message added")})
-    
-    io.to(data.row_id).emit('recieve_message',data)
-    console.log(`${data} sending message`)
-    let id=data.row_id
-    socket.on('leave_room',(id)=>{
-      console.log(`${id} leaving room`)
-      socket.leave(id)
-    })
+    // console.log('senting messager to room ',data.row_id)
+
+   await socket.to(data.row_id).emit('recieve_message',data)
+  
     
    })
+   
+    
+   await socket.on('leave_room',(id)=>{
+      // console.log(`${id} leaving room`)
+      socket.leave(id)
+    })
   
  } catch (error) {
   console.log(error)
@@ -56,6 +62,7 @@ const jwt=require('jsonwebtoken')
 
 
 const db=require('./config/db');
+
 
 const connection = db.getConnection()
 .then(()=>console.log("Successfully connected"))
@@ -89,19 +96,9 @@ app.get(`/getmess`,async(req,res)=>{
   // console.log("COnnect")
   // console.log(id)
   const [result]=await db.query(`select * from chat where row_id=?`,[id])
-  console.log(result)
+  // console.log(result)
   res.json(result)
 })
-// socket.on('send_message', (data) => {
-  
-//   db.query("INSERT INTO messages (ride_id, row_id, text, date, time, user_id) VALUES (?, ?, ?, ?, ?, ?)", 
-//     [data.ride_id, data.row_id, data.text, data.date, data.time, data.user_id], 
-//     (err) => {
-//       if (!err) {
-//         io.emit('receive_message', data);
-//       }
-//   });
-// });
 
 app.delete('/delete',(req,res)=>{
 
@@ -109,7 +106,7 @@ try {
     // console.log('try')
     
     const token_v=req.headers.authorization
-    const decode=jwt.decode(token_v,"SUPER_SECRET_TOKEN")
+    const decode=jwt.decode(token_v,tt.JWT_TOKEN)
     const userid=decode.user_id
     // console.log(userid)
     
@@ -118,7 +115,7 @@ try {
     db.query(`delete from users where id=?`,[userid],(err,res)=>{
         if(err){console.log('failed')}
         if(res.affectedRows===0){console.log("user Not found")}
-        console.log('successfully completed')
+       
     })
     return res.json({status:"success"})
 } catch (error) {
@@ -133,7 +130,7 @@ app.post('/checkdata',authentication, (req,res)=>{
 //  console.log(user_id)
 const {username,pp}=req.body
 
-    const token=jwt.sign({user_id},"SUPER_SECRET_TOKEN");
+    const token=jwt.sign({user_id},tt.JWT_TOKEN);
     
     return res.json({
         token:token,
@@ -146,12 +143,10 @@ app.get('/getdir',async (req,res)=>{
 
 
 try {
-  //  console.log(req.query.fs)
+
   const response= await axios.get(
-`https://maps.googleapis.com/maps/api/directions/json?destination=place_id:${req.query.fd}&origin=place_id:${req.query.fs}&alternatives=true&key=AIzaSyDO73QwI6MANZk0zcnPf11OhV4r3sV9ajA`  ).catch(err=>{console.log(err)})
-    // console.log(response.data.routes)
-  // console.log(response.data.routes[0].legs[0].steps)
-  // console.log(response.data.routes)
+`https://maps.googleapis.com/maps/api/directions/json?destination=place_id:${req.query.fd}&origin=place_id:${req.query.fs}&alternatives=true&key=${tt.MAPS_API_KEY}`  ).catch(err=>{console.log(err)})
+
     const cred={
       routes:response.data.routes,
     points:response.data.routes[0].legs[0].steps,
@@ -161,7 +156,7 @@ try {
     end:response.data.routes[0].legs[0].end_location,
     status:"success"
 }
-// console.log(response.data)
+
 res.json(cred);
 } catch (error) {
     res.json({status:"failed"})
@@ -177,7 +172,7 @@ try {
   let k=req.body
   db.query(`insert into rides(assigned,pickup,destination,date,time,av_seat,tot_fare,src,dest,op,fvicinity,tvicinity,isexpired,paid) value(?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,[k.driver,k.route.legs[0].start_address,k.route.legs[0].end_address,datee,k.time,k.pool,k.fare,JSON.stringify(route.legs[0].start_location),JSON.stringify(route.legs[0].end_location),k.route.overview_polyline.points,from.structured_formatting.main_text,to.structured_formatting.main_text,false,0]).then((kk)=>{
 
-    // console.log(res)
+    
     if(kk[0].affectedRows!=0){
       res.json({status:'success'})
     }
@@ -200,8 +195,8 @@ app.get('/getcor',async (req,res)=>{
     
     
   try {
-    const response = await axios.get(`https://maps.googleapis.com/maps/api/place/details/json?placeid=${req.query.id}&key=AIzaSyDO73QwI6MANZk0zcnPf11OhV4r3sV9ajA`);
-    // console.log(response.data)
+    const response = await axios.get(`https://maps.googleapis.com/maps/api/place/details/json?placeid=${req.query.id}&key=${tt.MAPS_API_KEY}`);
+   
     res.send(response.data);
   } catch (error) {
     console.log("Unable to Retrieve data,Please try Again")
@@ -215,7 +210,7 @@ app.get('/auto',async (req,res)=>{
       const response = await axios.get('https://maps.googleapis.com/maps/api/place/autocomplete/json', {
         params: {
             input: `${req.query.place}`,
-            key: 'AIzaSyDO73QwI6MANZk0zcnPf11OhV4r3sV9ajA'
+            key: tt.MAPS_API_KEY
         }
     });
   
@@ -256,8 +251,7 @@ WHERE
   [val]
 );
 const [list]=await db.query(`select * from rides where assigned=?`,[val])
-// console.log(list)
-// console.log(result)
+
    res.json({result:result,list:list})
 })
 
@@ -265,7 +259,7 @@ const [list]=await db.query(`select * from rides where assigned=?`,[val])
 
 app.get('/getinfo',async(req,res)=>{
 try {
-  const td=jwt.decode(req.query.d,"SUPER_SECRET_TOKEN")
+  const td=jwt.decode(req.query.d,tt.JWT_TOKEN)
  const k=td.user_id
  
   const [val]= await db.query(`
@@ -361,12 +355,10 @@ app.post('/delentry',async(req,res)=>{
 app.get('/getrides',async(req,res)=>{
 
   try {
-    // console.log("req")
   await db.query('use carpool')
 
       const date=JSON.parse(decodeURIComponent(req.query.req)).date
       const time=JSON.parse(decodeURIComponent(req.query.req)).time
-      // console.log(time)
 
 
   const extractChunks = (address) => {
@@ -379,8 +371,6 @@ app.get('/getrides',async(req,res)=>{
   const s_chunks = extractChunks(JSON.parse(decodeURIComponent(req.query.source)));
   const d_chunks = extractChunks(JSON.parse(decodeURIComponent(req.query.destination)));
   
-  // console.log("Source Chunks:", s_chunks);
-  // console.log("Destination Chunks:", d_chunks);
   
   let result = [];
   
@@ -388,7 +378,6 @@ app.get('/getrides',async(req,res)=>{
     for (let j = 0; j < d_chunks.length; j++) {
       const pickupTerm = `%${s_chunks[i]}%`;
       const destTerm = `%${d_chunks[j]}%`;
-  //expire logic
       const matches = await db.query(
         `SELECT * FROM rides WHERE pickup LIKE ? AND destination LIKE ? AND av_seat > 0 and DATE(date)>=?  `,
         [pickupTerm, destTerm,date,time]
@@ -401,7 +390,6 @@ app.get('/getrides',async(req,res)=>{
     }
     if (result.length > 0) break;
   }
-  // console.log(result)
   res.json(result);
   
     
@@ -420,8 +408,7 @@ app.post('/register',async(req,res)=>{
       const t=result
       
       const user_id=t.insertId
-      // console.log(user_id)
-          const token=jwt.sign({user_id},"SUPER_SECRET_TOKEN")
+          const token=jwt.sign({user_id},tt.JWT_TOKEN)
           return res.json({
               id:user_id,
               token_v:token
@@ -435,9 +422,7 @@ app.post('/register',async(req,res)=>{
   }
 
 })
-app.get('/explore',(req,res)=>{
-    return res.json({apikey:process.env.MAPS_API_KEY})
-})
+
 const port=5000;
 server  .listen(5000,(port)=>{
     console.log(`The port has started on 5000..`)

@@ -11,6 +11,7 @@ import { motion } from 'framer-motion'
 
 import { Types } from 'mysql'
 const Explore=()=>{
+  axios.get('http://localhost:5000/explore')
   const [route,findroute]=useState(false)
     const [source,setsource]=useState([])
     const [dest,setdest]=useState([])
