@@ -25,7 +25,8 @@ const Ridedet=()=>{
         console.log(details)
         
         const cred={
-            ride_id:details.assigned,
+            ride_id:details.id,
+            assigned:details.assigned,
             date:details.date,
             time:details.time,//listed user
             seats_req:seats,

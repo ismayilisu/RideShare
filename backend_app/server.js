@@ -90,6 +90,7 @@ const authentication=async (req,res,next)=>{
     next();
     
 }
+
 app.get(`/getmess`,async(req,res)=>{
   // console.log(req.query)
   const id=req.query.row
@@ -98,6 +99,36 @@ app.get(`/getmess`,async(req,res)=>{
   const [result]=await db.query(`select * from chat where row_id=?`,[id])
   // console.log(result)
   res.json(result)
+})
+app.get('/getkey',(req,res)=>
+res.json({key:tt.MAPS_API_KEY}))
+app.post('/dellist',async(req,res)=>{ 
+  const rideid=req.body.id
+  console.log(rideid)
+ try {
+  await db.query(`
+    delete from bookings where ride_id=?;
+    delete from rides where id=?;
+    delete from chat where row_id=?
+    `,[rideid,rideid,rideid])
+    console.log('delete')
+    res.json({status:'success'})
+ } catch (error) {
+  res.json({status:'failed'})
+  
+ }
+    
+
+})
+app.get(`/getlistmess`,async(req,res)=>{
+  // console.log(req.query)
+  const id=req.query.row
+  // console.log("COnnect")
+   
+  const [result]=await db.query(`select * from chat join rides on chat.row_id=rides.id where assigned=?`,[id])
+   console.log(result)
+   res.status(200).json(result)
+  
 })
 
 app.delete('/delete',(req,res)=>{
@@ -238,13 +269,15 @@ const [result] = await db.query(
     rides.date, 
     rides.time, 
     rides.isexpired,
-    bookings.row_id
+    bookings.row_id,
+    rides.av_seat,
+    rides.paid
 FROM 
     rides
 JOIN 
     bookings 
 ON 
-    bookings.driver_id = rides.assigned
+    bookings.ride_id = rides.id
 WHERE 
     bookings.user_id = ?;
 `,
@@ -286,16 +319,16 @@ try {
 
 app.post('/bookride',async(req,res)=>{
   const data=req.body
-  const {ride_id,date,time ,seats_req,token}=req.body//listed,current
+  const {ride_id,date,assigned,time ,seats_req,token}=req.body//listed,current
   let final=false
   
-  await db.query(`select * from rides where  assigned= ? and av_seat>= ? and DATE(date)>=CURDATE() `,[ride_id,seats_req]).then( async(res1)=>{
+  await db.query(`select * from rides where  assigned= ? and av_seat>= ? and DATE(date)>=CURDATE() `,[assigned,seats_req]).then( async(res1)=>{
    
     if(res1[0].length>0){
       
     
    
-    db.query(`insert into bookings(user_id,driver_id,seats) value(?,?,?);
+    db.query(`insert into bookings(user_id,ride_id,seats) value(?,?,?);
 
               update rides
               set av_seat=av_seat-?
@@ -305,7 +338,7 @@ app.post('/bookride',async(req,res)=>{
               where assigned=?
       
       
-      `,[token,ride_id,seats_req,seats_req,ride_id,seats_req,ride_id]).then((res2)=>{
+      `,[token,ride_id,seats_req,seats_req,assigned,seats_req,assigned]).then((res2)=>{
      
       
         res.json({status:"Success"})

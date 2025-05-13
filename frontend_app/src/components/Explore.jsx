@@ -9,9 +9,16 @@ import aboutus from './images/about-us.png'
 import profile from './images/profile.png'
 import { motion } from 'framer-motion'
 
+
 import { Types } from 'mysql'
 const Explore=()=>{
-  axios.get('http://localhost:5000/explore')
+ const [key,setkey]=useState(null)
+ useEffect(()=>{
+  const functionc =async()=>{
+    await axios.get(`http://www.localhost:5000/getkey`).then(res=>{setkey(res.data.key)})
+  }
+  functionc()
+ },[])
   const [route,findroute]=useState(false)
     const [source,setsource]=useState([])
     const [dest,setdest]=useState([])
@@ -245,18 +252,18 @@ const Explore=()=>{
                    </div>
                    <div className='w-fit h-full  flex items-center justify-center'><div className='rounded-r-full rounded-t-full rounded-b-full w-7 h-7 bg-black'></div> </div>
                   </motion.div>
-       <div className='w-full h-full bg-gray-300 rounded-4xl p-5 flex justify-around items-center gap-5 '>
+       <div className='w-full h-full bg-gray-300 rounded-sm p-5 flex justify-around items-center gap-5 '>
     <div className='flex p-2 flex-col gap-2'>
-    <div className='h-fit w-fit shadow-2xl rounded-4xl flex flex-col pl-30 pr-30 justify-around bg-gray-500 '>
+    <div className='h-fit w-fit shadow-2xl rounded-sm flex flex-col pl-30 pr-30 justify-around bg-gray-400 gap-2'>
         <div className='flex flex-col justify-evenly gap-4  p-2'>
           
         <div className='w-full '>
-          <input id='i' placeholder='Enter Your Source' className='block  w-full h-15 rounded-2xl shadow-2xl bg-white p-3 focus:outline-0' onChange={sourcechange} ></input>
+          <input id='i' placeholder='Enter Your Source' className='block  w-full h-15 rounded-sm shadow-2xl bg-white p-3 focus:outline-0' onChange={sourcechange} ></input>
             {source.length > 0 ? (
-                 <ul id= 'u1' className='w-fit h-fit absolute z-20 bg-white gap-0.5 rounded-2xl'>
+                 <ul id= 'u1' className='w-fit h-fit absolute z-20 bg-white gap-0.5 rounded-sm'>
           {source.map((item,index) => (
             
-            <li key={index} id={index} className='p-3 rounded-2xl cursor-pointer hover:bg-gray-50'  onClick={ async ()=>{
+            <li key={index} id={index} className='p-3 rounded-sm cursor-pointer hover:bg-gray-50'  onClick={ async ()=>{
                 
                 await axios.get(`http://www.localhost:5000/getcor?id=${item.place_id}`).then(
               async (res)=>{
@@ -274,11 +281,11 @@ const Explore=()=>{
           
           <div>
           <div className='w-full '>
-          <input id='i2' placeholder='Enter Your Destination' className='block  w-full h-15 rounded-2xl shadow-2xl bg-white p-3 focus:outline-0' onChange={destchange} ></input>
+          <input id='i2' placeholder='Enter Your Destination' className='block  w-full h-15 rounded-sm shadow-2xl bg-white p-3 focus:outline-0' onChange={destchange} ></input>
             {dest.length > 0 ? (
-                 <ul id='u2' className='w-fit h-fit absolute z-20 bg-white gap-0.5 rounded-2xl '>
+                 <ul id='u2' className='w-fit h-fit absolute z-20 bg-white gap-0.5 rounded-sm '>
           {dest.map((item,index) => (
-            <li key={index} id={index} className='p-3 rounded-2xl cursor-pointer hover:bg-gray-50'  onClick={ async ()=>{
+            <li key={index} id={index} className='p-3 rounded-sm cursor-pointer hover:bg-gray-50'  onClick={ async ()=>{
                 
               await axios.get(`http://www.localhost:5000/getcor?id=${item.place_id}`).then(
                async(res)=>{
@@ -300,7 +307,7 @@ const Explore=()=>{
           </div>
 
         </div>
-        <div className='w-full h-full bg-gray-100 p-2 flex flex-row rounded-xl shadow-2xl justify-around items-center'>
+        <div className='w-full h-full bg-gray-100 p-2 flex flex-row rounded-sm shadow-2xl justify-around items-center'>
         <input type='date' onChange={
         (e)=>{setdate(e.target.value)}
         }/>
@@ -310,14 +317,14 @@ const Explore=()=>{
 
         </div>
        
-        <div className='flex gap-3 [&>*]:bg-black [&>*]:w-40 [&>*]:rounded-3xl [&>*]:shadow-2xl p-2'>
+        <div className='flex gap-3 [&>*]:bg-black [&>*]:w-40 [&>*]:rounded-sm [&>*]:shadow-2xl p-2'>
        {route==true?( <button className='h-15 text-[white] text-center cursor-pointer' onClick={getrides}  >FIND RIDES</button>):( <button className='h-15 text-[white] text-center cursor-pointer bg-gray-300' onClick={getrides}  >FIND RIDES</button>)}
         <button className='h-15 text-[white] text-center cursor-pointer'>REPORT AN ERROR</button>
         </div>
         
        </div>
        {mul &&(
-        <div className='w-full h-fit flex flex-row flex flex-col'>
+        <div className='w-full h-fit flex flex-row'>
         <h3>Via:</h3>
         <select className='bg-white rounded-xl' onChange={
           async(e)=>{
@@ -341,9 +348,9 @@ const Explore=()=>{
       
        
        <div className='h-full w-full  flex flex-col justify-evenly gap-5'>
-     <div className='h-full w-full '>
+     <div className='h-full w-full rounded-sm'>
      
-        <LoadScript googleMapsApiKey="AIzaSyDO73QwI6MANZk0zcnPf11OhV4r3sV9ajA">
+      {key? (  <LoadScript googleMapsApiKey={key}>
       <GoogleMap 
         mapContainerStyle={containerStyle}
         center={center}
@@ -363,11 +370,11 @@ const Explore=()=>{
           }}
         />
       </GoogleMap>
-    </LoadScript>
+    </LoadScript>):(<div>Unable to Fetch Maps..</div>)}
 
         
      </div>
-   {loaded && (  <div className='h-50 w-full  shadow-2xl bg-white rounded-3xl p-5 flex flex-col justify-around items-center [&>*]:font-bold' >
+   {loaded && (  <div className='h-50 w-full  shadow-2xl bg-white rounded-sm p-5 flex flex-col justify-around items-center [&>*]:font-bold' >
    {mul && (<h3 className='animate-pulse text-red-500'>*Multiple routes Available</h3>)}
    <div className='flex flex-row justify-around  items-center w-full '>
    <div>

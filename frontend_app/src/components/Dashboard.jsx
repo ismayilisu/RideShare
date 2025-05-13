@@ -53,13 +53,30 @@ const [rideid,setrideid]=useState('')
     
         return () => {
             console.log("Disconnected from room:", rowid);
-            socket.current.emit('leave_room', rowid);  // Leave the room on cleanup
+            socket.current.emit('leave_room', rowid); 
+            setprevmess([]) // Leave the room on cleanup
             socket.current.off('recieve_message', handleReceiveMessage);  // Remove event listener
         };
     
     }, [rowid]);  // Trigger effect when `rowid` or `socket.current` changes
     
-    
+    const deletelisting=async()=>{
+        await axios.post(('http://localhost:5000/dellist'),{id:rideid})
+        .then(res => {
+            if (res.data.status=='success'){
+                window.location.reload()
+              
+            }
+            else{
+                alert("Failed to Delete,please try again later")
+            }
+        })
+        .catch(err => {
+            console.error(err); 
+        })
+        
+
+    }
     
     
 
@@ -70,6 +87,7 @@ const [rideid,setrideid]=useState('')
    const [load,setload]=useState(true)
    const [bdet,setbdet]=useState([])
    const [list,setlist]=useState([])
+   const [listdel,setlistdel]=useState(false)
     
    useEffect(()=>{
     const call=async ()=>{
@@ -84,6 +102,7 @@ const [rideid,setrideid]=useState('')
        const result= await axios.get(`http://www.localhost:5000/userrides?d=${localStorage.getItem('id')}`)
       
        setload(false)
+       console.log(result.data.result)
        setbdet(result.data.result)
        setlist(result.data.list)
     
@@ -204,19 +223,19 @@ return(
             <div></div>
 
             </nav>
-            <div className='h-full w-full bg-gray-200 rounded-3xl flex'> 
+            <div className='h-full w-full bg-gray-200 rounded-sm flex'> 
               <motion.div className='w-fit h-full flex flex-row gap-1'
                               initial={{ x:-70 }}
                               whileHover={{ x:0 }}
                               transition={{ type:'tween' }}>
-                              <div className=' h-full w-20 bg-gray-200 rounded-r-4xl flex flex-col justify-evenly items-center '
+                              <div className=' h-full w-20 bg-gray-200 rounded-r-sm flex flex-col justify-evenly items-center '
                                
                                >
                    
-                                                              <button className='h-5 w-10 rounded-2xl  cursor-pointer ' onClick={()=>{navigate('/home')}} ><img  src={home}/></button>
-                                                              <button className='h-5 w-10 rounded-2xl  cursor-pointer ' onClick={()=>{navigate('/e')}} > <img  className='stroke-amber-50' src={compass}/></button>
-                                                              <button className='h-5 w-10 rounded-2xl  cursor-pointer' onClick={()=>{navigate('/about')}} > <img src={aboutus}/></button>
-                                                              {localStorage.getItem('token')!==''? (<button className='h-5 w-10 rounded-2xl  cursor-pointer' onClick={()=>{navigate('/Dashboard')}}> <img src={profile}/></button>):(<></>)}
+                                                              <button className='h-5 w-10 rounded-sm  cursor-pointer ' onClick={()=>{navigate('/home')}} ><img  src={home}/></button>
+                                                              <button className='h-5 w-10 rounded-sm  cursor-pointer ' onClick={()=>{navigate('/e')}} > <img  className='stroke-amber-50' src={compass}/></button>
+                                                              <button className='h-5 w-10 rounded-sm  cursor-pointer' onClick={()=>{navigate('/about')}} > <img src={aboutus}/></button>
+                                                              {localStorage.getItem('token')!==''? (<button className='h-5 w-10 rounded-sm  cursor-pointer' onClick={()=>{navigate('/Dashboard')}}> <img src={profile}/></button>):(<></>)}
                                </div>
                                <div className='w-fit h-full  flex items-center justify-center'><div className='rounded-r-full rounded-t-full rounded-b-full w-7 h-7 bg-black'></div> </div>
                               </motion.div>
@@ -224,7 +243,7 @@ return(
            {!popup ? (
              <div className='w-full h-full flex p-5 gap-5 '>
 
-<div className='w-fit  flex flex-col   gap-3 [&>*]:rounded-3xl mt-3  [&>*]:cursor-pointer [$>*]:hover:shadow-2xl  [$>*]:hover:shadow-gray-400 font-mono font-bold'>
+<div className='w-fit  flex flex-col   gap-3 [&>*]:rounded-sm mt-3  [&>*]:cursor-pointer [$>*]:hover:shadow-2xl  [$>*]:hover:shadow-gray-400 font-mono font-bold'>
 <motion.button 
 
 className=' w-full text-center bg-gray-300 p-5 ' onClick={()=>{
@@ -252,7 +271,7 @@ className=' w-full text-center bg-gray-300 p-5 ' onClick={()=>{
 <div className='  relative h-full w-full p-2 flex justify-center rounded-xl '>
 {chat ? (<div className='fixed inset-0 z-10 '>
     <div className='w-full h-full absolute z-20 backdrop-blur-sm flex justify-center items-center p-20'>
-        <div className=' w-full h-full  flex flex-col rounded-2xl shadow-2xl gap-1'>
+        <div className=' w-full h-full  flex flex-col rounded-sm shadow-2xl gap-1'>
             <div className='h-10 p-2 w-full flex justify-end'>
                 <div className=' w-10 h-10 rounded-full bg-black'><button onClick={()=>{showchat(false)
                 socket.current.emit('leave_room',rowid)
@@ -261,8 +280,8 @@ className=' w-full text-center bg-gray-300 p-5 ' onClick={()=>{
                 }} className='w-full h-full text-white font-bold text-2xl hover:cursor-pointer'>X</button></div>
             </div>
             <div  className='p-2 flex flex-col  font-mono w-full h-full gap-2'>
-                <div className='border rounded-lg p-2'>{`Listed By User : ${rideid}`}</div>
-                <div className=' rounded-lg flex-1 p-1 bg-gray-200'>
+                <div className='border rounded-sm p-2'>{`Listed By User : ${rideid}`}</div>
+                <div className=' rounded-sm flex-1 p-1 bg-gray-200'>
                 {getmess?
                 (
                     <div className='overflow-hidden h-95   flex flex-col gap-2 '>
@@ -284,7 +303,7 @@ className=' w-full text-center bg-gray-300 p-5 ' onClick={()=>{
                 
 
 
-                }}/><button className='p-2 rounded-lg text-white bg-black' onClick={sendmess}> SEND</button></div>
+                }}/><button className='p-2 rounded-sm text-white bg-black' onClick={sendmess}> SEND</button></div>
             </div>
         </div>
     </div>
@@ -313,7 +332,7 @@ className=' w-full text-center bg-gray-300 p-5 ' onClick={()=>{
 <td className="border h-fit w-fit p-1">{value.destination}</td>
 <td className=" h-fit w-fit p-1">
 <button 
-className='flex-1 text-center bg-black text-white p-2 rounded-2xl hover:cursor-pointer' 
+className='flex-1 text-center bg-black text-white p-2 rounded-sm hover:cursor-pointer' 
 onClick={() => {
     
     console.log(value)
@@ -327,11 +346,11 @@ Cancel
 </td>
 <td className=" h-fit w-fit ">
 <button 
-className='flex-1 text-center bg-green-600 text-white p-2 rounded-2xl hover:cursor-pointer' 
+className='flex-1 text-center bg-green-600 text-white p-2 rounded-sm hover:cursor-pointer' 
 onClick={async() => {
     setrowid(value.id)
     setrideid(value.assigned)
-    console.log(value)
+    console.log(value)//finding messagees related to one specific ride ie value.id
     await axios.get(`http://localhost:5000/getmess?row=${value.id}`).then(res=>{
        console.log(res.data)
         setprevmess(res.data)
@@ -387,6 +406,8 @@ onClick={async() => {
 <th>Pickup Location</th>
 <th>Drop Location</th>
 <th>Expired</th>
+<th>Number Of Bookings</th>
+
 
 </tr>
 </thead>
@@ -398,6 +419,53 @@ onClick={async() => {
 <td className="border h-fit w-fit p-1">{value.pickup}</td>
 <td className="border h-fit w-fit p-1">{value.destination}</td>
 <td className="border h-fit w-fit p-1">{value.isexpired==true ? 'YES':'NO'}</td>
+<td className="border h-fit w-fit p-1">{`${value.paid}/${value.paid+value.av_seat}`}</td>
+{!value.isexpired && (<td className='h-fit w-fit p-1'><button className='bg-black font-mono p-2 text-white rounded-sm hover:cursor-pointer' 
+onClick={()=>{
+    setrideid(value.id)
+    console.log(value.id)
+    setlistdel(true)
+    
+}}
+
+>Cancel</button></td>)}
+{!value.isexpired && (<td className='h-fit w-fit p-1'><button className='bg-green-600 font-mono p-2 text-white rounded-sm hover:cursor-pointer' onClick={async()=>{
+    setrowid(value.id)
+    setrideid(value.assigned)
+
+    console.log(value)//finding messagees related to one specific ride ie value.id
+     
+    await axios.get(`http://localhost:5000/getlistmess?row=${id}`).then(res=>{
+       console.log(res.data)
+        setprevmess(res.data)
+        setgetmess(true)
+    })
+    console.log("shwong chat")
+    showchat(true)
+    
+  
+   
+}}>Chat</button></td>)}
+
+{/* <td className='h-fit w-fit p-1'><button className='bg-green-600 font-mono p-2 text-white rounded-sm hover:cursor-pointer' onClick={async()=>{
+    setrowid(value.id)
+    setrideid(value.assigned)
+
+    console.log(value)//finding messagees related to one specific ride ie value.id
+     
+    await axios.get(`http://localhost:5000/getlistmess?row=${id}`).then(res=>{
+       console.log(res.data)
+        setprevmess(res.data)
+        setgetmess(true)
+    })
+    console.log("shwong chat")
+    showchat(true)
+    
+  
+   
+}}>Chat</button></td> */}
+
+
 </tr>
 ))}
 </tbody>
@@ -422,6 +490,40 @@ onClick={async() => {
 
 
 )}</>)}
+
+{listdel && (
+  <div className="fixed inset-0 z-10 w-full h-full">
+    <div className="z-20 backdrop-blur-sm backdrop-brightness-50 absolute w-full h-full flex items-center justify-center">
+      <div className="w-150 h-100 bg-white rounded-sm p-10 flex flex-col justify-center gap-2">
+        <div className='font-mono font-bold'>Delete Ride Listing?</div>
+        <p className='flex py-10'>*You’re about to remove your ride from the listings.
+Others won’t be able to see or book it anymore.
+
+</p>
+<p className='flex-1'>Do you want to continue?</p>
+        <div className="w-full justify-around flex flex-row">
+          <motion.button 
+          whileHover={{backgroundColor:'black',color:'white'}}
+          transition={{ duration:0.25 }}
+          onClick={()=>{
+            setlistdel(false) 
+            
+          }} 
+          className='rounded-sm p-1 text-black hover:cursor-pointer'>No</motion.button>
+          <motion.button
+           className='rounded-sm p-1 text-black hover:cursor-pointer'
+          whileHover={{backgroundColor:'black',color:'white'}}
+          transition={{ duration:0.25 }}
+          
+          
+           onClick={()=>{
+            deletelisting()
+          }}>Yes,I do</motion.button>
+        </div>
+      </div>
+    </div>
+  </div>
+)}
 
 { page=="history" &&   (
     <div className='w-full p-5'>
@@ -470,33 +572,33 @@ onClick={async() => {
 )}
 
     {page=="profile" && (
-        <div className=' h-fit w-full  rounded-3xl shadow-2xl flex flex-col gap-4 p-3'>
+        <div className=' h-fit w-full  rounded-sm shadow-2xl flex flex-col gap-4 p-3'>
     <div className='flex justify-center items-center h-50'>
         <img className='rounded-full h-30 w-30' src={profile}></img>
     </div>
     <div className='[&>*]: flex gap-2 flex-col [&>*]:h-10 [&>*]:p-2.5'>
         <div className='flex flex-row gap-2 items-center'>
             <h3>Name : </h3>
-            <input id='fname' className=' rounded-2xl p-2 bg-gray-300' defaultValue={data.username} onChange={ (e)=>{
+            <input id='fname' className=' rounded-sm p-2 bg-gray-300' defaultValue={data.username} onChange={ (e)=>{
         setchange(true)}}> 
         </input>
         </div>
         <div className='flex flex-row gap-2 items-center'>
             <h3>E-Mail : </h3>
-            <input id='lname' className=' rounded-2xl p-2 bg-gray-300' defaultValue={data.email}  onChange={ ()=>{setchange(true)}}></input>
+            <input id='lname' className=' rounded-sm p-2 bg-gray-300' defaultValue={data.email}  onChange={ ()=>{setchange(true)}}></input>
 
             
         </div>
         <div className='flex flex-row gap-2 items-center'>
             <h3>NITC-MAIL  : </h3>
-            <input disabled defaultValue={data.phone || 'Unavailable'} className='bg-gray-300 rounded-2xl hover:cursor-not-allowed p-2'></input>
+            <input disabled defaultValue={data.phone || 'Unavailable'} className='bg-gray-300 rounded-sm hover:cursor-not-allowed p-2'></input>
 
 
             
         </div>
         <div className='flex flex-row gap-2 items-center'>
             <h3>CONTACT-NO : </h3>
-            <input disabled defaultValue={data.phone || 'Unavailable'} className='bg-gray-200 rounded-2xl hover:cursor-not-allowed p-2 bg-gray-300'></input>
+            <input disabled defaultValue={data.phone || 'Unavailable'} className=' rounded-sm hover:cursor-not-allowed p-2 bg-gray-300'></input>
 
 
             
@@ -504,7 +606,7 @@ onClick={async() => {
        
         
     </div>
-    <div className='flex justify-around [&>*]:h-15 [&>*]:rounded-2xl [&>*]:p-3 '>
+    <div className='flex justify-around [&>*]:h-15 [&>*]:rounded-sm [&>*]:p-3 '>
         <button className='bg-black text-white hover:cursor-pointer' onClick={()=>{ setpage('delete')}}>DELETE ACCOUNT</button>
         <button  className='bg-gray-200 text-black hover:cursor-pointer' onClick={()=>{ setpage('logout')}}>LOGOUT</button>
     </div>
@@ -536,7 +638,7 @@ onClick={async() => {
                 <h2 className='text-2xl font-bold'>Are you sure you want to cancel this ride booking?</h2>
                 <p className=' py-10'>This action cannot be undone. If you proceed, your seat will be released for other users, and you may not be able to rebook it later.</p>
                 <div className='flex flex-row justify-around items-center w-full'>
-                    <motion.button className='w-fit h-fit p-2 rounded-xl hover:cursor-pointer bg-transparent'
+                    <motion.button className='w-fit h-fit p-2 rounded-sm hover:cursor-pointer bg-transparent'
                     whileHover={{
     backgroundColor: "#000000",
     color: "#ffffff" 
@@ -549,7 +651,7 @@ onClick={async() => {
   onClick={()=>{showPopup(false)}}
                     >Cancel</motion.button>
 
-                    <motion.button className=' w-fit h-fit p-2  bg-transparent text-black rounded-xl hover:cursor-pointer
+                    <motion.button className=' w-fit h-fit p-2  bg-transparent text-black rounded-sm hover:cursor-pointer
                     '
                     whileHover={{
     backgroundColor: "#000000",
@@ -583,7 +685,7 @@ This action is permanent and all your data will be lost.
 </h2>
             <p className='flex-1'>* You will no longer be able to recover your profile, messages, bookings, or any associated content.
 </p>
-            <div className='flex flex-row w-full h-fit justify-around '><motion.button className='hover:cursor-pointer p-2 rounded-lg'
+            <div className='flex flex-row w-full h-fit justify-around '><motion.button className='hover:cursor-pointer p-2 rounded-sm'
               whileHover={{
     backgroundColor: "#000000",
     color: "#ffffff" 
@@ -594,7 +696,7 @@ This action is permanent and all your data will be lost.
   }}
             
             onClick={()=>{setpage('profile')}}>Cancel</motion.button> <motion.button 
-            className='hover:cursor-pointer p-2 rounded-lg'
+            className='hover:cursor-pointer p-2 rounded-sm'
               whileHover={{
     backgroundColor: "#000000",
     color: "#ffffff" 
@@ -619,7 +721,7 @@ This action is permanent and all your data will be lost.
 </h2>
             <p className='flex-1'>* You will need to log in again to access your account.
 </p>
-            <div className='flex flex-row w-full h-fit justify-around '><motion.button className='hover:cursor-pointer p-2 rounded-lg'
+            <div className='flex flex-row w-full h-fit justify-around '><motion.button className='hover:cursor-pointer p-2 rounded-sm'
               whileHover={{
     backgroundColor: "#000000",
     color: "#ffffff" 
@@ -630,7 +732,7 @@ This action is permanent and all your data will be lost.
   }}
             
             onClick={()=>{setpage('profile')}}>Cancel</motion.button> <motion.button 
-            className='hover:cursor-pointer p-2 rounded-lg'
+            className='hover:cursor-pointer p-2 rounded-sm'
               whileHover={{
     backgroundColor: "#000000",
     color: "#ffffff" 

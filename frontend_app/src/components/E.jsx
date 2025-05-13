@@ -88,14 +88,14 @@ return(
 
             
                 
-             className='w-full h-full    border-black  border-4 text-gray-800 rounded-lg flex flex-col font-mono hover:cursor-pointer hover:shadow-white hover:shadow-2xl'  >
+             className='w-full h-full    rounded-sm border-2 text-gray-800  flex flex-col font-mono hover:cursor-pointer hover:shadow-white hover:shadow-2xl'  >
              
-             <img className='object-cover w-full h-full absolute inset-0 z-10 ' src={driver}></img>
+             <img className='object-cover w-full rounded-sm h-full absolute inset-0 z-10 ' src={driver}></img>
              <div className='absolute inset-0 w-full h-full  backdrop-brightness-50 z-20'>
                 
              </div>
              
-             <div className='absolute w-full h-full inset-0 z-30 flex flex-col font-mono text-white '>
+             <div className='absolute w-full h-full inset-0 z-30 flex flex-col font-mono text-white rounded-sm '>
              <h2 className='text-4xl p-2 text-center'>List a Ride</h2>
               <p className='p-2 text-xl'>
               “Help others reach their destination while saving on your own ride. Listing a ride takes less than a minute and connects you with fellow students heading the same way.”   
