@@ -1,7 +1,7 @@
 # RideShare
 # 🚗 RideShare App (NITC Pooling Service)
 
-A full-stack ride-sharing platform built for students of NIT Calicut. The app enables users to book rides, get pooled with others based on optimized routes, and chat directly with ride providers.
+A full-stack ride-sharing platform built for students. The app enables users to book rides, get pooled with others based on optimized routes, and chat directly with ride providers.
 
 ## 📦 Tech Stack
 
