@@ -49,9 +49,9 @@ root/
 └── README.md
 
 # How Pooling Works
-# When a new ride is booked, backend compares its route with existing rides.
-# If the similarity score (based on location and time overlap) is high, a match is suggested.
-# Users are pooled automatically and notified.
+ When a new ride is booked, backend compares its route with existing rides.
+ If the similarity score (based on location and time overlap) is high, a match is suggested.
+ Users are pooled automatically and notified.
 
 
 # Future Improvements
